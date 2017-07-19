@@ -18,3 +18,17 @@ ACCESS_TOKEN_SECRET = os.environ['ACCESS_TOKEN_SECRET']
 auth = tweepy.OAuthHandler(CONSUMER_KEY, CONSUMER_SECRET)
 auth.set_access_token(ACCESS_TOKEN, ACCESS_TOKEN_SECRET)
 api=tweepy.API(auth)
+
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('source_file', type = argparse.FileType('a'))
+    parser.add_argument('target_file', type = argparse.FileType('a'))
+    parser.add_argument('--languages', nargs = '+', default = ['ja'])
+    args = parser.parse_args()
+
+    while True:
+        
+    
+
+if __name__ == "__main__":
+    main()
