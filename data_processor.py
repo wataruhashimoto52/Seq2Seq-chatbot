@@ -1,5 +1,4 @@
 import re
-import os
 import sys
 import tensorflow as tf
 
@@ -193,6 +192,3 @@ if __name__ == "__main__":
     data_to_token_ids(VALIDATION_ENC_PATH, VAL_ENC_IDX_PATH, VOCAB_ENC_PATH)
     data_to_token_ids(VALIDATION_DEC_PATH, VAL_DEC_IDX_PATH, VOCAB_DEC_PATH)
     print("Done")
-    
-
-
