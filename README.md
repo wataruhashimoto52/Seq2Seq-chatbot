@@ -23,4 +23,4 @@ This is seq2seq chatbot.
 
 ## Author
 
-[wh52] https://github.com/wataruhashimoto52
+[wataruhashimoto52] https://github.com/wataruhashimoto52
