@@ -1,9 +1,39 @@
 import re
 import sys
+from sys import platform
 import tensorflow as tf
 
 #For Japanese tokenizer
 import MeCab
+
+is_fast_build = False
+beam_search = True
+beam_size = 20
+
+DATA_DIR = "data"
+if is_fast_build:
+    TWEETS_TXT = "{0}/tweets_short.txt".format(DATA_DIR)
+else:
+    TWEETS_TXT = "{0}/tweets.txt".format(DATA_DIR)
+
+if is_fast_build:
+    MAX_ENC_VOCABULARY = 5
+    NUM_LAYERS = 2
+    LAYER_SIZE = 2
+    BATCH_SIZE = 2
+    buckets = [(5, 10), (8, 13)]
+else:
+    MAX_ENC_VOCABULARY = 50000
+    NUM_LAYERS = 3
+    LAYER_SIZE = 256
+    BATCH_SIZE = 64
+    buckets = [(5, 10), (10, 15), (20, 25), (40, 50)]
+
+MAX_DEC_VOCABULARY = MAX_ENC_VOCABULARY
+
+LEARNING_RATE = 0.5
+LEARNING_RATE_DECAY_FACTOR = 0.99
+MAX_GRADIENT_NORM = 5.0
 
 
 #path list
@@ -23,8 +53,7 @@ TRAIN_ENC_IDX_PATH = "generated/train_enc_idx.txt"
 TRAIN_DEC_IDX_PATH = "generated/train_dec_idx.txt"
 VAL_ENC_IDX_PATH = "generated/val_enc_idx.txt"
 VAL_DEC_IDX_PATH = "generated/val_dec_idx.txt"
-
-MAX_VOCABULARY = 50000
+LOGS_DIR = 'logs'
 DIGIT_RE = re.compile(r"\d")
 _WORD_SPLIT = re.compile("([.,!/?\":;)(])")
 
@@ -182,8 +211,8 @@ if __name__ == "__main__":
     print("Done")
 
     print("Creating vocabulary files...")
-    create_vocabulary(SOURCE_PATH, VOCAB_ENC_PATH, MAX_VOCABULARY)
-    create_vocabulary(TARGET_PATH, VOCAB_DEC_PATH, MAX_VOCABULARY)
+    create_vocabulary(SOURCE_PATH, VOCAB_ENC_PATH, MAX_ENC_VOCABULARY)
+    create_vocabulary(TARGET_PATH, VOCAB_DEC_PATH, MAX_DEC_VOCABULARY)
     print("Done")
 
     print("Creating sentence idx files...")

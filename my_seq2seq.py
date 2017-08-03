@@ -29,19 +29,11 @@ from tensorflow.python.ops import control_flow_ops
 from tensorflow.python.ops import embedding_ops
 from tensorflow.python.ops import math_ops
 from tensorflow.python.ops import nn_ops
-# from tensorflow.python.ops import rnn
-# from tensorflow.contrib.rnn.python.ops import rnn
-# from tensorflow.contrib import rnn
-from tensorflow.contrib.rnn.python.ops import core_rnn
-from tensorflow.contrib.rnn.python.ops import core_rnn_cell as rnn_cell
 from tensorflow.python.ops import variable_scope
 import tensorflow as tf
 
-try:
-  # linear = tf.nn.rnn_cell.linear
-  linear = tensorflow.contrib.rnn.python.ops.core_rnn_cell_impl.linear
-except:
-  from tensorflow.contrib.rnn.python.ops.core_rnn_cell_impl import _linear as linear
+
+linear = tf.nn.rnn_cell_impl._linear()
 
 
 def _extract_argmax_and_embed(embedding, output_projection=None,
@@ -336,7 +328,7 @@ def embedding_rnn_seq2seq(encoder_inputs, decoder_inputs, cell,
     encoder_cell = rnn_cell.EmbeddingWrapper(
         cell, embedding_classes=num_encoder_symbols,
         embedding_size=embedding_size)
-    _, encoder_state = core_rnn.static_rnn(encoder_cell, encoder_inputs, dtype=dtype)
+    _, encoder_state = tf.nn.rnn_cell.static_rnn(encoder_cell, encoder_inputs, dtype=dtype)
 
     # Decoder.
     if output_projection is None:
@@ -784,7 +776,7 @@ def embedding_attention_seq2seq(encoder_inputs, decoder_inputs, cell_1,cell_2,
     encoder_cell = rnn_cell.EmbeddingWrapper(
         cell_1, embedding_classes=num_encoder_symbols,
         embedding_size=embedding_size)#reuse=tf.get_variable_scope().reuse
-    encoder_outputs, encoder_state = core_rnn.static_rnn(
+    encoder_outputs, encoder_state = tf.nn.rnn_cell.static_rnn(
         encoder_cell, encoder_inputs,
         #scope='embedding_attention_decoder/attention_decoder',
         dtype=dtype)
