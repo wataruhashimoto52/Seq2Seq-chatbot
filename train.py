@@ -44,15 +44,15 @@ def create_or_restore_model(session, buckets, forward_only, beam_search, beam_si
     # beam search is off for training
     """Create model and initialize or load parameters"""
 
-    model = seq2seq_model.Seq2SeqModel(source_vocab_size=config.MAX_ENC_VOCABULARY,
-                                       target_vocab_size=config.MAX_DEC_VOCABULARY,
+    model = seq2seq_model.Seq2SeqModel(source_vocab_size=data_processor.MAX_ENC_VOCABULARY,
+                                       target_vocab_size=data_processor.MAX_DEC_VOCABULARY,
                                        buckets=buckets,
-                                       size=config.LAYER_SIZE,
-                                       num_layers=config.NUM_LAYERS,
-                                       max_gradient_norm=config.MAX_GRADIENT_NORM,
-                                       batch_size=config.BATCH_SIZE,
-                                       learning_rate=config.LEARNING_RATE,
-                                       learning_rate_decay_factor=config.LEARNING_RATE_DECAY_FACTOR,
+                                       size=data_processor.LAYER_SIZE,
+                                       num_layers=data_processor.NUM_LAYERS,
+                                       max_gradient_norm=data_processor.MAX_GRADIENT_NORM,
+                                       batch_size=data_processor.BATCH_SIZE,
+                                       learning_rate=data_processor.LEARNING_RATE,
+                                       learning_rate_decay_factor=data_processor.LEARNING_RATE_DECAY_FACTOR,
                                        beam_search=beam_search,
                                        attention=True,
                                        forward_only=forward_only,
@@ -78,7 +78,11 @@ def next_random_bucket_id(buckets_scale):
 
 
 def train():
+    tf_config = tf.ConfigProto(gpu_options = tf.GPUOptions(visible_device_list = "0"))
+    print(tf_config)
     with tf.Session(config=tf_config) as sess:
+
+        print("a")
 
         show_progress("Setting up data set for each buckets...")
         train_set = read_data_into_buckets(data_processor.TRAIN_ENC_IDX_PATH, data_processor.TRAIN_DEC_IDX_PATH, data_processor.buckets)
@@ -88,7 +92,7 @@ def train():
         show_progress("Creating model...")
         # False for train
         beam_search = False
-        model = create_or_restore_model(sess, data_processor.buckets, forward_only=False, beam_search=beam_search, beam_size=data_processor.beam_size)
+        model = create_or_restore_model(sess, data_processor.buckets, forward_only = False, beam_search = beam_search, beam_size = data_processor.beam_size)
 
         show_progress("done\n")
 
@@ -159,5 +163,5 @@ def train():
                 eval_ppx = math.exp(average_perplexity) if average_perplexity < 300 else float('inf')
                 print("  eval: bucket %d perplexity %.2f" % (bucket_id, eval_ppx))
 
-if __name__ == "__train__":
+if __name__ == "__main__":
     train()

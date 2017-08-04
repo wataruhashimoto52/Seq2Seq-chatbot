@@ -11,10 +11,6 @@ beam_search = True
 beam_size = 20
 
 DATA_DIR = "data"
-if is_fast_build:
-    TWEETS_TXT = "{0}/tweets_short.txt".format(DATA_DIR)
-else:
-    TWEETS_TXT = "{0}/tweets.txt".format(DATA_DIR)
 
 if is_fast_build:
     MAX_ENC_VOCABULARY = 5
@@ -34,7 +30,6 @@ MAX_DEC_VOCABULARY = MAX_ENC_VOCABULARY
 LEARNING_RATE = 0.5
 LEARNING_RATE_DECAY_FACTOR = 0.99
 MAX_GRADIENT_NORM = 5.0
-
 
 #path list
 SOURCE_PATH = "data/source.txt"

@@ -33,8 +33,8 @@ class Seq2SeqModel(object):
 
         def sampled_loss(inputs, labels):
             with tf.device("/cpu:0"):
-                labels = tf.shape(labels, [-1,1])
-            return tf.nn.sampled_softmax_loss(w_t, b, labels, inputs, num_samples,self.target_vocab_size)
+                labels = tf.reshape(labels, [-1,1])
+                return tf.nn.sampled_softmax_loss(w_t, b, labels, inputs, num_samples,self.target_vocab_size)
         
         softmax_loss_function = sampled_loss
         
@@ -87,7 +87,7 @@ class Seq2SeqModel(object):
         for i in range(buckets[-1][0]):
             self.encoder_inputs.append(tf.placeholder(tf.int32, shape = [None],
                                                         name = "encoder{0}".format(i)))
-        for i in range(buckets[-1][1]):
+        for i in range(buckets[-1][1] + 1):
             self.decoder_inputs.append(tf.placeholder(tf.int32, shape = [None],
                                                         name = "encoder{0}".format(i)))
             self.target_weights.append(tf.placeholder(tf.float32, shape = [None],
@@ -117,27 +117,27 @@ class Seq2SeqModel(object):
                           for output in self.outputs[b]
                         ]
         else:
-          self.outputs, self.losses = model_with_buckets(
-          self.encoder_inputs, self.decoder_inputs, targets,
-          self.target_weights, buckets,
-          lambda x, y: seq2seq_f(x, y, False),
-          softmax_loss_function=softmax_loss_function)
+            self.outputs, self.losses = model_with_buckets(
+                self.encoder_inputs, self.decoder_inputs, targets,
+                self.target_weights, buckets,
+                lambda x, y: seq2seq_f(x, y, False),
+                softmax_loss_function=softmax_loss_function)
 
-    # Gradients and SGD update operation for training the model.
-    params = tf.trainable_variables()
-    if not forward_only:
-      self.gradient_norms = []
-      self.updates = []
-      opt = tf.train.GradientDescentOptimizer(self.learning_rate)
-      for b in xrange(len(buckets)):
-        gradients = tf.gradients(self.losses[b], params)
-        clipped_gradients, norm = tf.clip_by_global_norm(gradients,
-                                                         max_gradient_norm)
-        self.gradient_norms.append(norm)
-        self.updates.append(opt.apply_gradients(
-            zip(clipped_gradients, params), global_step=self.global_step))
+        # Gradients and SGD update operation for training the model.
+        params = tf.trainable_variables()
+        if not forward_only:
+            self.gradient_norms = []
+            self.updates = []
+            opt = tf.train.GradientDescentOptimizer(self.learning_rate)
+            for b in xrange(len(buckets)):
+                gradients = tf.gradients(self.losses[b], params)
+                clipped_gradients, norm = tf.clip_by_global_norm(gradients,
+                                                                max_gradient_norm)
+                self.gradient_norms.append(norm)
+                self.updates.append(opt.apply_gradients(
+                    zip(clipped_gradients, params), global_step=self.global_step))
 
-    self.saver = tf.train.Saver(tf.global_variables())
+        self.saver = tf.train.Saver(tf.global_variables())
     
     def step(self, session, encoder_inputs, decoder_inputs, target_weights,
            bucket_id, forward_only, beam_search):
