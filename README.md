@@ -12,7 +12,7 @@ Tensorflow v1.2
 Mecab
 tweepy
 
-##Demo
+## Demo
 
 1. Prepare train data.
 2. Preprocess the train data.
