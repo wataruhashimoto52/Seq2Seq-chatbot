@@ -11,7 +11,7 @@ SHOULD_TWEET = 1
 
 def create_tables():
     conn = sqlite3.connect(DB_NAME)
-    sql = 'create table tweets(sid integer primary key, data blob not null, processed integer not null default 0)'
+    sql = 'create table tweets(sid integer primary key, data text not null, bot_flag integer not null default 0, processed integer not null default 0 )'
     c = conn.cursor()
     c.execute(sql)
     conn.commit()
@@ -86,6 +86,6 @@ def tweet_listener():
 
 
 if __name__ == "__main__":
-    if False:
+    if os.path.exists(DB_NAME) is False:
         create_tables()
     tweet_listener()

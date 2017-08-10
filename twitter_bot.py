@@ -1,17 +1,34 @@
 #coding: utf-8
 
 import os 
-import tensorflow as tf 
 import tweepy
 import time
 import predict
 import sqlite3
 import pickle
+import random
+import tensorflow as tf 
 import twitter_listener
 
+book_list = [' https://www.amazon.co.jp/dp/4862760856/ref=cm_sw_r_tw_dp_x_779IzbMGRYVJS ',
+            ' https://www.amazon.co.jp/dp/B01GJOQSO2/ref=cm_sw_r_tw_dp_x_I99Izb2YHWR9V ',
+            ' https://www.amazon.co.jp/dp/477597114X/ref=cm_sw_r_tw_dp_x_e99IzbVBPJYHX ',
+            ' https://www.amazon.co.jp/dp/4061592998/ref=cm_sw_r_tw_dp_x_Y.9Izb1ZYZRFW ',
+            ' https://www.amazon.co.jp/dp/B01AXRCDZ4/ref=cm_sw_r_tw_dp_x_T-9Izb2TMXPTG ',
+            ' https://www.amazon.co.jp/dp/B01CZK0B2Y/ref=cm_sw_r_tw_dp_x_8a-IzbFVB3F43 ',
+            ' https://www.amazon.co.jp/dp/4560093024/ref=cm_sw_r_tw_dp_x_fc-IzbGXF6FA1 ',
+            ' https://www.amazon.co.jp/dp/4532190452/ref=cm_sw_r_tw_dp_x_Wd-Izb5HTQAAX ',
+            ' https://www.amazon.co.jp/dp/4003420950/ref=cm_sw_r_tw_dp_x_9g-Izb5J15S60 ',
+            ]
+
+serif_list = [' よくも言ったなあああ!!💢💢💢 ピヨヨヨヨヨヨヨヨヨヨ💢💢💢💢',
+            ' 頭にバナナぶっ刺すよ？？💢💢💢',
+            ' たこの入っていないたこ焼きみたいなあなたに言われたくない💢💢💢'
+            ]
 def select_next_tweets():
-    conn = sqlite3.connect(tweet)
+    conn = sqlite3.connect('tweets.db')
     c = conn.cursor()
+    c.execute("select sid, data, bot_flag from tweets where processed = 0")
     for row in c:
         sid  = row[0]
         data = pickle.loads(row[1])
@@ -20,7 +37,7 @@ def select_next_tweets():
     return None, None, None
 
 def mark_tweet_processed(status_id):
-    conn = sqlite3.connect(tweet_listener.DB_NAME)
+    conn = sqlite3.connect(twitter_listener.DB_NAME)
     c = conn.cursor()
     c.execute("update tweets set processed = 1 where sid = ?", [status_id])
     conn.commit()
@@ -33,8 +50,13 @@ def tweets():
             yield(status_id, tweet, bot_flag)
         time.sleep(1)
 
+def is_contain(twit, str):
+    if twit.find(str) != -1:
+        return True
+    return False
+
 def post_reply(api, bot_flag, reply_body, screen_name, status_id):
-    reply_body = reply_body.replace("_UNK", '◯')
+    reply_body = reply_body.replace("_UNK", '💩')
     if bot_flag == twitter_listener.SHOULD_TWEET:
         reply_text = reply_body
         print("My tweet:{0}".format(reply_text))
@@ -48,6 +70,22 @@ def post_reply(api, bot_flag, reply_body, screen_name, status_id):
         print("Reply:{0}".format(reply_text))
         api.update_status(status = reply_text, in_reply_to_status_id = status_id)
     
+def special_reply(api, bot_flag, screen_name, status_id, code):
+    if code == 1:
+        reply_text = random.choice(book_list) + "はおすすめ。"
+    elif code == 2:
+        reply_text = random.choice(serif_list)
+
+    if bot_flag == twitter_listener.SHOULD_TWEET:
+        print("My tweet:{0}".format(reply_text))
+        if not reply_text:
+            reply_text = '適切なお返事が応答できませんでした😇😇'
+        api.update_status(status = reply_text)
+    else:
+        #reply_body = '適切なお返事が応答できませんでした😇😇'
+        reply_text = "@" + screen_name + " " + reply_text
+        print("Reply:{0}".format(reply_text))
+        api.update_status(status = reply_text, in_reply_to_status_id = status_id)
 
 def twitter_bot():
     tf_config = tf.ConfigProto(gpu_options = tf.GPUOptions(visible_device_list = "0"))
@@ -61,7 +99,7 @@ def twitter_bot():
     auth.set_access_token(ACCESS_TOKEN, ACCESS_TOKEN_SECRET)
     api = tweepy.API(auth)
 
-    with tf.Session(tf_config) as sess:
+    with tf.Session(config = tf_config) as sess:
         predictor = predict.EasyPredictor(sess)
 
         for tweet in tweets():
@@ -78,7 +116,12 @@ def twitter_bot():
                 print("No reply predicted")
             else:
                 try:
-                    post_reply(api, bot_flag, reply_body, screen_name, status_id)
+                    if is_contain(status.text, 'おすすめの本'):
+                        special_reply(api, bot_flag, screen_name, status_id, code = 1)
+                    elif is_contain(status.text, '人工無能'):
+                        special_reply(api, bot_flag, screen_name, status_id, code = 2)
+                    else:
+                        post_reply(api, bot_flag, reply_body, screen_name, status_id)
                 except tweepy.TweepError as e:
                     if e.api_code == 187:
                         pass
