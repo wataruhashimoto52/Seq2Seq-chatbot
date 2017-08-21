@@ -74,7 +74,6 @@ def japanese_tokenizer(sentence):
 
 def num_lines(file):
     """
-    ファイル中の文章の行数を返す
 
     Args:
         file: target file
@@ -87,7 +86,6 @@ def num_lines(file):
 
 def create_train_validation(filepath, train_path, validation_path, train_ratio = 0.9):
     """
-    ファイルパス先のファイルをtrainとvalidationデータに分ける
 
     Args:
       filepath: source file path
@@ -113,7 +111,7 @@ def create_train_validation(filepath, train_path, validation_path, train_ratio =
 
 def create_vocabulary(filepath, vocabulary_path, max_vocabulary_size, tokenizer = japanese_tokenizer):
     """
-    語彙ファイルを作る．
+    make word file.
     """
 
     if tf.gfile.Exists(vocabulary_path):
@@ -142,7 +140,6 @@ def create_vocabulary(filepath, vocabulary_path, max_vocabulary_size, tokenizer 
 
         vocab_list = _START_VOCAB + sorted(vocab, key = vocab.get, reverse = True)
         if len(vocab_list) > max_vocabulary_size:
-            #できるだけ打ち切りたくないからmax_vocab_sizeは大きめのほうが良いかも？？？
             vocab_list = vocab_list[:max_vocabulary_size]
         with tf.gfile.GFile(vocabulary_path, "w") as vocab_file:
             for w in vocab_list:
