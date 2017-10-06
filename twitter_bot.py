@@ -9,6 +9,8 @@ import pickle
 import random
 import tensorflow as tf 
 import twitter_listener
+from settings import *
+
 
 book_list = [' https://www.amazon.co.jp/dp/4862760856/ref=cm_sw_r_tw_dp_x_779IzbMGRYVJS ',
             ' https://www.amazon.co.jp/dp/B01GJOQSO2/ref=cm_sw_r_tw_dp_x_I99Izb2YHWR9V ',
@@ -25,11 +27,13 @@ anger_list = [' よくも言ったなあああ!!💢💢💢 ピヨヨヨヨヨ�
             ' 頭にバナナぶっ刺すよ？？💢💢💢',
             ' たこの入っていないたこ焼きみたいなあんたに言われたくないよ'
             ]
+
 serif_list = [' ありがとう。',
             ' お疲れ様。今日も一日，よく頑張ったね。',
             ' ゆっくり休んで。',
             ' そのツイートって新規性あります？',
             ' 元気そうでよかった。']
+
 def select_next_tweets():
     conn = sqlite3.connect('tweets.db')
     c = conn.cursor()
@@ -80,8 +84,10 @@ def special_reply(api, bot_flag, screen_name, status_id, code):
         reply_text = random.choice(book_list) + "はおすすめ。"
     elif code == 2:
         reply_text = random.choice(anger_list)
+
     elif code == 3:
         reply_text = random.choice(serif_list)
+
         
     if bot_flag == twitter_listener.SHOULD_TWEET:
         print("My tweet:{0}".format(reply_text))
@@ -97,11 +103,6 @@ def special_reply(api, bot_flag, screen_name, status_id, code):
 def twitter_bot():
     tf_config = tf.ConfigProto(gpu_options = tf.GPUOptions(visible_device_list = "0"))
     
-    CONSUMER_KEY = os.environ['CONSUMER_KEY']
-    CONSUMER_SECRET = os.environ['CONSUMER_SECRET']
-    ACCESS_TOKEN = os.environ['ACCESS_TOKEN']
-    ACCESS_TOKEN_SECRET = os.environ['ACCESS_TOKEN_SECRET']
-
     auth = tweepy.OAuthHandler(CONSUMER_KEY, CONSUMER_SECRET)
     auth.set_access_token(ACCESS_TOKEN, ACCESS_TOKEN_SECRET)
     api = tweepy.API(auth)
@@ -127,8 +128,10 @@ def twitter_bot():
                         special_reply(api, bot_flag, screen_name, status_id, code = 1)
                     elif is_contain(status.text, '人工無能'):
                         special_reply(api, bot_flag, screen_name, status_id, code = 2)
+
                     elif is_contain(status.text, 'ありがとう'):
                         special_reply(api, bot_flag, screen_name, status_id, code = 3)
+
                     else:
                         post_reply(api, bot_flag, reply_body, screen_name, status_id)
                 except tweepy.TweepError as e:
