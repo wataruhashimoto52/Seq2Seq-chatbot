@@ -79,10 +79,7 @@ def next_random_bucket_id(buckets_scale):
 
 def train():
     tf_config = tf.ConfigProto(gpu_options = tf.GPUOptions(visible_device_list = "0"))
-    print(tf_config)
     with tf.Session(config=tf_config) as sess:
-
-        print("a")
 
         show_progress("Setting up data set for each buckets...")
         train_set = read_data_into_buckets(data_processor.TRAIN_ENC_IDX_PATH, data_processor.TRAIN_DEC_IDX_PATH, data_processor.buckets)
