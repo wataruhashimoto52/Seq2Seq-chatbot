@@ -4,6 +4,8 @@ import os
 import sqlite3
 import pickle
 from settings import *
+import tweepy
+
 from datetime import datetime, timedelta
 
 DB_NAME = 'tweets.db'
@@ -65,6 +67,7 @@ class StreamListener(tweepy.StreamListener):
 
 
 def tweet_listener():
+
 
     auth = tweepy.OAuthHandler(CONSUMER_KEY, CONSUMER_SECRET)
     auth.set_access_token(ACCESS_TOKEN, ACCESS_TOKEN_SECRET)

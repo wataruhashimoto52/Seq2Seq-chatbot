@@ -2,3 +2,5 @@
 data/
 .ipynb_checkpoints
 generated/
+logs/
+__pycache__
