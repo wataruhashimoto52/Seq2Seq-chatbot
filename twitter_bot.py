@@ -65,7 +65,7 @@ def is_contain(twit, str):
     return False
 
 def post_reply(api, bot_flag, reply_body, screen_name, status_id):
-    reply_body = reply_body.replace("_UNK", '💩')
+    reply_body = reply_body.replace("_UNK", '💩').replace(" ", "")
     if bot_flag == twitter_listener.SHOULD_TWEET:
         reply_text = reply_body
         print("My tweet:{0}".format(reply_text))
@@ -101,7 +101,7 @@ def special_reply(api, bot_flag, screen_name, status_id, code):
         api.update_status(status = reply_text, in_reply_to_status_id = status_id)
 
 def twitter_bot():
-    tf_config = tf.ConfigProto(gpu_options = tf.GPUOptions(visible_device_list = "0"))
+    tf_config = tf.ConfigProto(device_count = {"GPU":0}, log_device_placement = True)
     
     auth = tweepy.OAuthHandler(CONSUMER_KEY, CONSUMER_SECRET)
     auth.set_access_token(ACCESS_TOKEN, ACCESS_TOKEN_SECRET)

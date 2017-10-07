@@ -3,7 +3,9 @@
 import os
 import sqlite3
 import pickle
+from settings import *
 import tweepy
+
 from datetime import datetime, timedelta
 
 DB_NAME = 'tweets.db'
@@ -56,7 +58,7 @@ class StreamListener(tweepy.StreamListener):
 
     @staticmethod
     def get_next_tweet_time():
-        return datetime.today() + timedelta(hours=4)
+        return datetime.today() + timedelta(hours=0.5)
 
     @staticmethod
     def on_error(status_code):
@@ -65,10 +67,7 @@ class StreamListener(tweepy.StreamListener):
 
 
 def tweet_listener():
-    CONSUMER_KEY = os.environ['CONSUMER_KEY']
-    CONSUMER_SECRET = os.environ['CONSUMER_SECRET']
-    ACCESS_TOKEN = os.environ['ACCESS_TOKEN']
-    ACCESS_TOKEN_SECRET = os.environ['ACCESS_TOKEN_SECRET']
+
 
     auth = tweepy.OAuthHandler(CONSUMER_KEY, CONSUMER_SECRET)
     auth.set_access_token(ACCESS_TOKEN, ACCESS_TOKEN_SECRET)
